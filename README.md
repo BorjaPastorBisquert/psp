@@ -18,7 +18,7 @@ Los objetos también pueden ser métodos como por ejemplo: ladrar, comer, etc...
 public static color;
 public static void ladrar(){}
 ```
-##Sobrecarga de métodos
+## Sobrecarga de métodos
 La Sobrecarga de métodos en java es la manera de reutilizar métodos de manera óptima en una misma clase, haciendo que un mismo método tenga diferentes usos.
 ```Java
 public static void dormir(Class gato){
@@ -29,7 +29,7 @@ public static void dormir(Class perro){
 }
 ```
 Para gato será boca arriba y para perro será boca abajo.
-##Herencia
+## Herencia
 La herencia nos permite crear clases y que estas puedan compartir algunos de sus atributos de manera jerárquica, y solo de manera descendente, es decir, si tenemos la siguiente estructura:coche>deportivo/monovolumen; deportivo y monovolumen serán parte de la clase coche y podremos tener coches deportivos y monovolumenes pero no coches en sí.
 ```Java
 public abstract Coche {
@@ -42,7 +42,7 @@ public Monovolumen extends Coche{
 
 }
 ```
-##Polimorfismo
+## Polimorfismo
 El Polimorfismo es lo mismo que la Sobrecarga salvo que para ser Sobrecarga, el método debe ser llamado varias veces desde una misma clase y el Polimorfismo.
-##Interface
+## Interface
 Una interfaz es una clase donde metemos solo métodos, como una libreria de creación propia.
