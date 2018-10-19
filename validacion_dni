@@ -1,0 +1,49 @@
+import java.lang.*;
+import java.util.*;
+	public class ValidarDNI {
+		public static boolean validarNIF(String nif) {
+			boolean validar = false;
+			String[] letras ={"T","R","W","A","G","M","Y","F","P","D","X","B","N","J","Z","S","Q","V","H","L","C","K","E"};
+			int num = Integer.parseInt(nif.substring(0,nif.length() - 2));
+			num = num % 23;
+			for (int i = 0; i < letras.length; i++) {
+				if(nif.charAt(nif.length() - 1) == letras[i].charAt(0)) {
+					validar = true;
+				}
+			}
+			return validar;
+		}
+		public static Scanner lector = new Scanner(System.in);
+		public static boolean validarLetrayNum(String nif) {
+			boolean validar = false;
+			boolean validar2 = false;
+			boolean validarTotal = false;
+				if(nif.length() == 9 && Character.isLetter(nif.charAt(nif.length()- 1))) {
+					validar = true;
+				}
+				for (int i = 0; i < nif.length() - 1; i++) {
+					if(Character.isDigit(nif.charAt(i))) {
+						validar2 = true;
+						break;
+					}
+				}
+				if(validar == true && validar2 == true) {
+					validarTotal = true;
+				}
+				return validarTotal;
+		}
+		
+		public static void main(String[] args) {
+			String nif;
+			System.out.print("Introduzca su NIF: ");
+			nif = lector.next();
+			lector.nextLine();
+			if(validarLetrayNum(nif) == true && validarNIF(nif) == true) {
+				System.out.println("NIF valido");
+				System.out.println("Parte numérica del NIF : " +
+					nif.substring(0,nif.length() - 1));
+			} else {
+				System.out.println("NIF no valido");
+			}
+		}
+}
