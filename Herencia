@@ -1,0 +1,117 @@
+**********************EMPLEADO**********************
+package ejer;
+
+public class Empleado {
+	protected String nombre;
+
+	//CONSTRUCTORES
+	public Empleado(String nombre) {
+		super();
+		this.nombre = nombre;
+	}
+	public Empleado() {
+		
+	}
+	//Getters & Setters
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	//MÉTODOS
+	@Override
+	public String toString() {
+		return "Empleado " + nombre;
+	}
+	
+}
+**********************OPERARIO**********************
+package ejer;
+
+public class Operario extends Empleado {
+
+	//CONSTRUCTORES
+	public Operario(String nombre) {
+		super(nombre);
+	}
+	
+	//METODOS
+	@Override
+	public String toString() {
+		return super.toString()+" -> Operario";
+	}
+
+}
+**********************DIRECTIVO**********************
+package ejer;
+
+public class Directivo extends Empleado {
+
+	//CONSTRUCTORES
+	public Directivo(String nombre) {
+		super(nombre);
+	}
+	//METODOS
+
+	@Override
+	public String toString() {
+		return super.toString()+" -> Directivo";
+	}
+	
+}
+**********************OFICIAL**********************
+package ejer;
+
+public class Oficial extends Operario {
+	//CONSTRUCTORES
+	public Oficial(String nombre) {
+		super(nombre);
+	}
+	//METODOS
+
+	@Override
+	public String toString() {
+		return super.toString() + " -> Oficial";
+	}
+	
+}
+**********************TÉCNICO**********************
+package ejer;
+
+public class Tecnico extends Operario {
+
+	//CONSTRUCTORES
+	public Tecnico(String nombre) {
+		super(nombre);
+	}
+	//METODOS
+
+	@Override
+	public String toString() {
+		return super.toString() + " -> Técnico";
+	}
+	
+}
+**********************EJERMAIN**********************
+package ejer;
+
+public class EjerMain {
+
+	public static void main(String[] args) {
+		Empleado E1 = new Empleado("Rafa");
+		Directivo D1 = new Directivo("Mario");
+		Operario OP1 = new Operario("Alfonso");
+		Oficial OF1 = new Oficial("Luis");
+		Tecnico T1 = new Tecnico("Pablo");
+		System.out.println(E1);
+		System.out.println(D1);
+		System.out.println(OP1);
+		System.out.println(OF1);
+		System.out.println(T1);
+
+	}
+
+}
