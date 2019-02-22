@@ -1,6 +1,7 @@
 //Este proyecto está dividido en dos packages: cliente y server. En cliente se encuentran las clases Client y ClientThread; en server
 //ChatServer y ServerThread
-
+//Para comprobar que se pueden conectar más de una persona al chat se necesita ejecutar la clase Client más de una vez y navegar entre
+//el elemento Console Display, en la barra de la ejecución en consola de Eclipse.
 
 Client Class:
 
