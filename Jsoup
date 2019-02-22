@@ -1,0 +1,99 @@
+Main Class:
+
+package sample;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        primaryStage.setTitle("Hello World");
+        primaryStage.setScene(new Scene(root, 640, 480));
+        primaryStage.show();
+    }
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+========================================================================================================================================
+Controller class:
+
+package sample;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import org.jsoup.nodes.Document;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+
+
+public class Controller {
+    public static Document getHtmlDocument(String url) {
+
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (IOException ex) {
+            System.out.println("Excepción al obtener el HTML de la página" + ex.getMessage());
+        }
+        return doc;
+    }
+    public static final String web="https://elpais.com/";
+    @FXML
+    private ListView<Element> lv;
+    private ObservableList<Element> items= FXCollections.observableArrayList();
+    @FXML
+    void searchTitle(ActionEvent event) throws IOException {
+        //Obtengo el html de la web en un objeto document
+        Document document=getHtmlDocument(web);
+        String title=document.title();
+        Elements noticia=document.select("h2>a[href]*");
+
+        System.out.println(noticia);
+        lv.setItems(items);
+        for (Element news:noticia){
+            lv.getItems().add(news.tagName("#text"));
+        }
+
+    }
+}
+========================================================================================================================================
+Sample.fxml Class
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <center>
+      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button layoutX="274.0" layoutY="361.0" mnemonicParsing="false" onAction="#searchTitle" text="Button" />
+            <ListView fx:id="lv" layoutX="25.0" layoutY="31.0" prefHeight="313.0" prefWidth="551.0" />
+         </children>
+      </Pane>
+   </center>
+</BorderPane>
+
