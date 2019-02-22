@@ -1,0 +1,247 @@
+//Este proyecto está dividido en dos packages: cliente y server. En cliente se encuentran las clases Client y ClientThread; en server
+//ChatServer y ServerThread
+
+
+Client Class:
+
+package cliente;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+import server.ServerThread;
+
+public class Client {
+
+    private static final String host = "192.168.21.236";
+    private static final int portNumber = 9090;
+
+    private String userName;
+    private String serverHost;
+    private int serverPort;
+    private Scanner userInputScanner;
+
+    public static void main(String[] args){
+        String readName = null;
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Introduce tu nickname:");
+        while(readName == null || readName.trim().equals("")){
+            // null, empty, whitespace(s) no permitidos.
+            readName = scan.nextLine();
+            if(readName.trim().equals("")){
+                System.out.println("Error. Vuelve a introducirlo:");
+            }
+        }
+
+        Client client = new Client(readName, host, portNumber);
+        client.startClient(scan);
+    }
+
+    private Client(String userName, String host, int portNumber){
+        this.userName = userName;
+        this.serverHost = host;
+        this.serverPort = portNumber;
+    }
+
+    private void startClient(Scanner scan){
+        try{
+            Socket socket = new Socket(serverHost, serverPort);
+            Thread.sleep(1000); // Esperando a la respuesta de la red.
+
+            ServerThread serverThread = new ServerThread(socket, userName);
+            Thread serverAccessThread = new Thread(serverThread);
+            serverAccessThread.start();
+            while(serverAccessThread.isAlive()){
+                if(scan.hasNextLine()){
+                    serverThread.addNextMessage(scan.nextLine());
+                }
+            }
+        }catch(IOException ex){
+            System.err.println("Fatal Connection error!");
+            ex.printStackTrace();
+        }catch(InterruptedException ex){
+            System.out.println("Interrupted");
+        }
+    }
+}
+========================================================================================================================================
+ClientThread Class:
+
+package cliente;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+import server.ChatServer;
+
+public class ClientThread implements Runnable {
+    private Socket socket;
+    private PrintWriter clientOut;
+    private ChatServer server;
+
+    public ClientThread(ChatServer server, Socket socket){
+        this.server = server;
+        this.socket = socket;
+    }
+
+    private PrintWriter getWriter(){
+        return clientOut;
+    }
+
+    @Override
+    public void run() {
+        try{
+            // setup
+            this.clientOut = new PrintWriter(socket.getOutputStream(), false);
+            Scanner in = new Scanner(socket.getInputStream());
+
+            
+            while(!socket.isClosed()){
+                if(in.hasNextLine()){
+                    String input = in.nextLine();
+                    
+                    for(ClientThread thatClient : server.getClients()){
+                        PrintWriter thatClientOut = thatClient.getWriter();
+                        if(thatClientOut != null){
+                            thatClientOut.write(input + "\r\n");
+                            thatClientOut.flush();
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+========================================================================================================================================
+ChatServer class:
+
+package server;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import cliente.ClientThread;
+
+public class ChatServer {
+
+    private static final int portNumber = 9090;
+
+    private int serverPort;
+    private List<ClientThread> clients; 
+
+    public static void main(String[] args){
+        ChatServer server = new ChatServer(portNumber);
+        server.startServer();
+    }
+
+    public ChatServer(int portNumber){
+        this.serverPort = portNumber;
+    }
+
+    public List<ClientThread> getClients(){
+        return clients;
+    }
+
+    private void startServer(){
+        clients = new ArrayList<ClientThread>();
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(serverPort);
+            acceptClients(serverSocket);
+        } catch (IOException e){
+            System.err.println("No se ha podido escuchar en ese puerto: "+serverPort);
+            System.exit(1);
+        }
+    }
+
+    private void acceptClients(ServerSocket serverSocket){
+
+        System.out.println("Puerto de inicio del servidor = " + serverSocket.getLocalSocketAddress());
+        while(true){
+            try{
+                Socket socket = serverSocket.accept();
+                System.out.println("Acepta : " + socket.getRemoteSocketAddress());
+                ClientThread client = new ClientThread(this,socket);
+                Thread thread = new Thread(client);
+                thread.start();
+                clients.add(client);
+            } catch (IOException ex){
+                System.out.println("Fallo en : "+serverPort);
+            }
+        }
+    }
+}
+========================================================================================================================================
+ServerThread Class:
+
+package server;
+
+import java.io.*;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Scanner;
+
+public class ServerThread implements Runnable {
+    private Socket socket;
+    private String userName;
+    private boolean isAlived;
+    private final LinkedList<String> messagesToSend;
+    private boolean hasMessages = false;
+
+    public ServerThread(Socket socket, String userName){
+        this.socket = socket;
+        this.userName = userName;
+        messagesToSend = new LinkedList<String>();
+    }
+
+    public void addNextMessage(String message){
+        synchronized (messagesToSend){
+            hasMessages = true;
+            messagesToSend.push(message);
+        }
+    }
+
+    @Override
+    public void run(){
+        System.out.println("Welcome :" + userName);
+
+        System.out.println("Local Port :" + socket.getLocalPort());
+        System.out.println("Server = " + socket.getRemoteSocketAddress() + ":" + socket.getPort());
+
+        try{
+            PrintWriter serverOut = new PrintWriter(socket.getOutputStream(), false);
+            InputStream serverInStream = socket.getInputStream();
+            Scanner serverIn = new Scanner(serverInStream);
+            
+
+            while(!socket.isClosed()){
+                if(serverInStream.available() > 0){
+                    if(serverIn.hasNextLine()){
+                        System.out.println(serverIn.nextLine());
+                    }
+                }
+                if(hasMessages){
+                    String nextSend = "";
+                    synchronized(messagesToSend){
+                        nextSend = messagesToSend.pop();
+                        hasMessages = !messagesToSend.isEmpty();
+                    }
+                    serverOut.println(userName + " > " + nextSend);
+                    serverOut.flush();
+                }
+            }
+        }
+        catch(IOException ex){
+            ex.printStackTrace();
+        }
+
+    }
+}
